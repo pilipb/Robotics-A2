@@ -58,7 +58,7 @@ int state; // Variable to store the current state
 // square stuff:
 float SQUARE_SIZE = 200; // Size of the square in mm
 int side_count = 0; // Count of the number of sides of the square
-float side
+int num_squares = 1; // Number of squares to complete
 
 void drive_along_angle(float angle) {
 
@@ -277,14 +277,29 @@ void loop() {
     motors.set_motor(left_control, right_control, MAX_MOTOR_STEP_SIZE); // Set the motor speeds
   }
 
-  side_theta = side_count * PI/2;
+  float side_theta = side_count * PI/2;
 
   // DECIDE STATE:
   if (state == STATE_INITIAL && (millis() - timer >= 1500)) {
     state = STATE_DRIVE_FORWARD;
   } 
 
-  else if (state == STATE_DRIVE_FORWARD && side_count == 0 && (x_i >= SQUARE_SIZE)) {
+  else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 0 && (x_i >= SQUARE_SIZE)) {
+    buzzer.beep(1000,200);
+    state = TURN;
+  }
+
+  else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 1 && (y_i >= SQUARE_SIZE)) {
+    buzzer.beep(1000,200);
+    state = TURN;
+  }
+
+  else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 2 && (x_i <= 0)) {
+    buzzer.beep(1000,200);
+    state = TURN;
+  }
+
+  else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 3 && (y_i <= 0)) {
     buzzer.beep(1000,200);
     state = TURN;
   }
@@ -295,7 +310,7 @@ void loop() {
     side_count++;
     }
 
-  else if (side_count > 3) {
+  else if (side_count > 4*num_squares -1) {
     state = STATE_INITIAL
   }  
 
