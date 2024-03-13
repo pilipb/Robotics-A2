@@ -43,9 +43,9 @@ float left_motor_demand;          // Demand for the left motor
 
 // Motor speed paramters
 float MOTOR_SPEED = 75;   // Deafult forwards motor speed
-float MAX_MOTOR_STEP_SIZE = 5; // Maximum step size for ramping the motor speed
+float MAX_MOTOR_STEP_SIZE = 500; // Maximum step size for ramping the motor speed
 float TURN_SPEED = 20;    // Default turning speed
-float TURN_ON_SPOT_SPEED = 20; // Default turning speed on the spot
+float TURN_ON_SPOT_SPEED = 35; // Default turning speed on the spot
 
 // Definition of states
 #define STATE_INITIAL 0
@@ -59,7 +59,8 @@ int state; // Variable to store the current state
 // square stuff:
 float SQUARE_SIZE = 300; // Size of the square in mm
 int side_count = 0; // Count of the number of sides of the square
-int num_squares = 2; // Number of squares to complete
+int num_squares = 1; // Number of squares to complete
+int dir = 1;
 
 void drive_along_angle(float angle) {
 
@@ -308,10 +309,13 @@ void loop() {
 
   else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 3 && (y_i <= 0)) {
     buzzer.beep(1000, 200);
+    // Stop the motors
+    motors.set_motor(0, 0, MAX_MOTOR_STEP_SIZE);
+    
     state = TURN;
   }
 
-  else if (state == TURN && theta_i <= ((side_count + 1)*PI / 2)) {
+  else if (state == TURN && theta_i >= ((side_count + 1)*PI / 2)) {
     buzzer.beep(1000, 200);
     state = STATE_DRIVE_FORWARD;
     side_count++;
@@ -329,8 +333,9 @@ void loop() {
 
   } else if (state == TURN) {
 
-    right_motor_demand =  TURN_ON_SPOT_SPEED;
-    left_motor_demand = -TURN_ON_SPOT_SPEED;
+
+//    right_motor_demand = - dir * TURN_ON_SPOT_SPEED;
+//    left_motor_demand =  dir * TURN_ON_SPOT_SPEED;
 
     //  } else if (state == STATE_FOLLOW_LINE) {
     //
@@ -366,7 +371,8 @@ void loop() {
 
   } else if (state == STATE_DEBUG) {
 
-
+    right_motor_demand =  TURN_ON_SPOT_SPEED;
+    left_motor_demand = -TURN_ON_SPOT_SPEED;
 
     // rotate_on_spot(PI);
     // drive_along_angle(0);
@@ -383,11 +389,11 @@ void loop() {
     // Serial.print("rotation_speed_r:");
     // Serial.println(rotation_speed_r_smoothed);
 
-    Serial.print("rotation_speed_r:");
-    Serial.print(rotation_speed_r_smoothed);
-    Serial.print(" ");
-    Serial.print("rotation_speed_l:");
-    Serial.println(rotation_speed_l_smoothed);
+    //    Serial.print("rotation_speed_r:");
+    //    Serial.print(rotation_speed_r_smoothed);
+    //    Serial.print(" ");
+    //    Serial.print("rotation_speed_l:");
+    //    Serial.println(rotation_speed_l_smoothed);
 
     // KINEMATICS:
     //   Serial.print(x_i);
