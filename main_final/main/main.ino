@@ -59,7 +59,7 @@ int state; // Variable to store the current state
 // square stuff:
 float SQUARE_SIZE = 300; // Size of the square in mm
 int side_count = 0; // Count of the number of sides of the square
-int num_squares = 1; // Number of squares to complete
+int num_squares = 2; // Number of squares to complete
 
 void drive_along_angle(float angle) {
 
@@ -281,36 +281,38 @@ void loop() {
   float side_theta = side_count * PI / 2;
 
   // DECIDE STATE:
+
   if (state == STATE_INITIAL && (millis() - timer >= 1500)) {
     state = STATE_DRIVE_FORWARD;
   }
 
   else if (state == TURN && side_count >= (( 4 * num_squares) - 1)) {
+    buzzer.beep(1000, 400);
     state = STATE_FINAL;
   }
 
   else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 0 && (x_i >= SQUARE_SIZE)) {
-    //    buzzer.beep(1000, 200);
+    buzzer.beep(1000, 200);
     state = TURN;
   }
 
   else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 1 && (y_i >= SQUARE_SIZE)) {
-    //    buzzer.beep(1000, 200);
+    buzzer.beep(1000, 200);
     state = TURN;
   }
 
   else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 2 && (x_i <= 0)) {
-    //    buzzer.beep(1000, 200);
+    buzzer.beep(1000, 200);
     state = TURN;
   }
 
   else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 3 && (y_i <= 0)) {
-    //    buzzer.beep(1000, 200);
+    buzzer.beep(1000, 200);
     state = TURN;
   }
 
   else if (state == TURN && theta_i <= ((side_count + 1)*PI / 2)) {
-    //    buzzer.beep(1000, 200);
+    buzzer.beep(1000, 200);
     state = STATE_DRIVE_FORWARD;
     side_count++;
   }

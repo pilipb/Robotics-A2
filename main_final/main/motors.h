@@ -74,26 +74,6 @@ public:
         }
         return demand_pwm;
     }
-
-    // float ramp_motor(float target_speed, float step_size) {
-        
-    //     // If the current speed value is within the step size of the target value, return the target value
-    //     if (abs(target_speed - current_speed) <= step_size) {
-    //         current_speed = target_speed;
-    //     }
-    //     // If the current speed is less than the target value, increase it by the step size
-    //     else if (current_speed < target_speed) {
-    //         current_speed += step_size;
-    //     }
-    //     // If the current speed is greater than the target value, decrease it by the step size
-    //     else
-    //     {
-    //         current_speed -= step_size;
-    //     }
-
-    //     return current_speed;
-    // }
-
     };
 
 #endif
