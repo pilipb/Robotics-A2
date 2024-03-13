@@ -20,6 +20,7 @@ PID_c heading_PID;         // Create instance of the PID_c class for the heading
 #define MOTOR_UPDATE 30
 #define PAUSE 1000
 
+// GLOBAL VARIABLES:
 // TIMESTAMP VARIABLES:
 unsigned long timer;
 unsigned long line_sensor_ts;
@@ -28,20 +29,13 @@ unsigned long kinematic_ts;
 unsigned long motor_ts;
 unsigned long ramp_ts;
 
-// GLOBAL VARIABLES:
 // Line sensors
 unsigned long sensor_readings[5]; // Array to store the sensor readings
 bool line[5];                     // Array to store if a line has been detected
-bool line_detected = false;
-bool turn_right = true;
-int intersection_count = 0;
-unsigned long last_line_detected = 0;
-unsigned long intersection_ts = 0;
-unsigned long REJOIN_LINE_TIME = 500;
+
 // Kinematics
 float heading_error;              // Value between 1 and -1 to represent the error of following the line
 float heading_control;            // Control signal for the heading
-float last_line_angle;            // The angle of the last line
 float left_control = 0;           // Control signal for the left motor
 float right_control = 0;          // Control signal for the right motor
 float right_motor_demand;         // Demand for the right motor
@@ -56,16 +50,14 @@ float TURN_ON_SPOT_SPEED = 10; // Default turning speed on the spot
 // Definition of states
 #define STATE_INITIAL 0
 #define STATE_DRIVE_FORWARD 1
-#define STATE_JOIN_LINE 2
-#define STATE_FOLLOW_LINE 3
-#define STATE_REJOIN_LINE 4
-#define STATE_INTERSECTION 5
-#define STATE_FACE_HOME 6
-#define STATE_RTH 7
-#define STATE_CROSSROADS 8
-#define STATE_FINISHED 9
-#define STATE_DEBUG 10
+#define TURN 2
+#define STATE_FINISHED 3
+#define STATE_DEBUG 4
 int state; // Variable to store the current state
+
+// square stuff:
+float SQUARE_SIZE = 200; // Size of the square in mm
+int side_count = 0; // Count of the number of sides of the square
 
 void drive_along_angle(float angle) {
 
@@ -289,80 +281,16 @@ void loop() {
     state = STATE_DRIVE_FORWARD;
   } 
 
-  else if (state == STATE_DRIVE_FORWARD && (x_i > 150)) {
+  else if (state == STATE_DRIVE_FORWARD && side_count == 0 && (x_i >= SQUARE_SIZE)) {
     buzzer.beep(1000,200);
-    state = STATE_JOIN_LINE;
+    state = TURN;
   }
 
-  else if (state == STATE_JOIN_LINE && theta_i > 1.4) {
+  else if (state == TURN && theta_i <= side_theta) {
     buzzer.beep(1000,200);
-    integral_reset();
-    state = STATE_FOLLOW_LINE;
-  }
-
-  else if (state == STATE_FOLLOW_LINE && !line[0] && !line[1] && !line[2] && !line[3] && !line[4]) {
-    if (line_detected) {
-      line_detected = false;
-      last_line_detected = millis();
-    } else if (millis() - last_line_detected >= REJOIN_LINE_TIME) {
-      buzzer.beep(1000,200);
-      integral_reset();
-      state = STATE_REJOIN_LINE;
+    state = STATE_DRIVE_FORWARD;
+    side_count++;
     }
-  }
-
-  else if (state == STATE_REJOIN_LINE && (line[1] || line[3])) {
-    buzzer.beep(1000,200);
-    integral_reset();
-    line_detected = true;
-    state = STATE_FOLLOW_LINE;
-  }
-
-  else if (state == STATE_FOLLOW_LINE && line[0] && line[4] && !line[2]){
-    intersection_ts = millis();
-    buzzer.beep(1000,200);
-    intersection_count++;
-    state = STATE_INTERSECTION;
-  }
-
-  else if (state == STATE_INTERSECTION && line[2]) {
-    buzzer.beep(1000,200);
-    turn_right = !turn_right;
-    integral_reset();
-    state = STATE_FOLLOW_LINE;
-  }
-
-  else if (state == STATE_FOLLOW_LINE && intersection_count == 2 && turn_right && line[4]) {
-    buzzer.beep(1000,200);
-    integral_reset();
-    intersection_ts = millis();
-    state = STATE_CROSSROADS;
-  }
-
-  else if (state == STATE_CROSSROADS && line[2] && (abs(theta_i - (last_line_angle-PI/2)) < 0.25)) {
-    buzzer.beep(1000,200);
-    intersection_count++;
-    integral_reset();
-    state = STATE_FOLLOW_LINE;
-  }
-
-  else if (state == STATE_REJOIN_LINE && ((abs (y_i) > 900) || (abs (x_i) > 900))) {
-    buzzer.beep(1000,200);
-    integral_reset();
-    state = STATE_FACE_HOME;
-  }
-
-  else if (state == STATE_FACE_HOME && (abs (theta_i - angle_to_home()) < 0.1)) {
-    buzzer.beep(1000,200);
-    integral_reset();
-    state = STATE_RTH;
-  }
-
-  else if (state == STATE_RTH && (abs(x_i) < 5) && (abs(y_i) < 5)) {
-    integral_reset(); 
-    timer = millis();
-    state = STATE_FINISHED;
-  }
 
 
   // STATE MACHINE:
@@ -370,12 +298,13 @@ void loop() {
       // Do nothing
 
   } else if (state == STATE_DRIVE_FORWARD) {
+    side_theta = side_count * PI/2;
+    drive_along_angle(angle);
 
-    drive_along_angle(0);
+  } else if (state == TURN) {
 
-  } else if (state == STATE_JOIN_LINE) {
-
-    join_line();
+    right_motor_demand =  TURN_ON_SPOT_SPEED;
+    left_motor_demand = -TURN_ON_SPOT_SPEED;
 
   } else if (state == STATE_FOLLOW_LINE) {
 
