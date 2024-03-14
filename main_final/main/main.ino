@@ -43,9 +43,9 @@ float left_motor_demand;          // Demand for the left motor
 
 // Motor speed paramters
 float MOTOR_SPEED = 75;   // Deafult forwards motor speed
-float MAX_MOTOR_STEP_SIZE = 500; // Maximum step size for ramping the motor speed
+float MAX_MOTOR_STEP_SIZE = 4; // Maximum step size for ramping the motor speed
 float TURN_SPEED = 20;    // Default turning speed
-float TURN_ON_SPOT_SPEED = 35; // Default turning speed on the spot
+float TURN_ON_SPOT_SPEED = 15; // Default turning speed on the spot
 
 // Definition of states
 #define STATE_INITIAL 0
@@ -59,7 +59,7 @@ int state; // Variable to store the current state
 // square stuff:
 float SQUARE_SIZE = 300; // Size of the square in mm
 int side_count = 0; // Count of the number of sides of the square
-int num_squares = 1; // Number of squares to complete
+int num_squares = 5; // Number of squares to complete
 int dir = 1;
 
 void drive_along_angle(float angle) {
@@ -207,9 +207,9 @@ void return_home() {
 void setup() {
 
   // Initialise PID controllers
-  r_motor_PID.initialise(0.60, 0.7, 0.4);
-  l_motor_PID.initialise(0.50, 0.7, 0.4);
-  heading_PID.initialise(20, 0.1, 0.2);
+  r_motor_PID.initialise(0.40, 0.7, 0.4);
+  l_motor_PID.initialise(0.40, 0.7, 0.4);
+  heading_PID.initialise(22, 0.15, 0.2);
 
   line_sensors.initialise_digital(); // Initialise the line sensors
   motors.initialise(); // Initialise the motors
@@ -287,11 +287,6 @@ void loop() {
     state = STATE_DRIVE_FORWARD;
   }
 
-  else if (state == TURN && side_count >= (( 4 * num_squares) - 1)) {
-    buzzer.beep(1000, 400);
-    state = STATE_FINAL;
-  }
-
   else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 0 && (x_i >= SQUARE_SIZE)) {
     buzzer.beep(1000, 200);
     state = TURN;
@@ -309,16 +304,19 @@ void loop() {
 
   else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 3 && (y_i <= 0)) {
     buzzer.beep(1000, 200);
-    // Stop the motors
-    motors.set_motor(0, 0, MAX_MOTOR_STEP_SIZE);
-    
     state = TURN;
   }
 
-  else if (state == TURN && theta_i >= ((side_count + 1)*PI / 2)) {
+  else if (state == TURN && theta_i >= (((side_count + 1)*PI) / 2)) {
     buzzer.beep(1000, 200);
     state = STATE_DRIVE_FORWARD;
+    integral_reset();
     side_count++;
+  }
+
+  else if (state == TURN && side_count >= (( 4 * num_squares) - 1)) {
+    buzzer.beep(1000, 400);
+    state = STATE_FINAL;
   }
 
   // STATE MACHINE:
@@ -333,9 +331,10 @@ void loop() {
 
   } else if (state == TURN) {
 
+    rotate_on_spot(((side_count + 1)*PI) / 2);
 
-//    right_motor_demand = - dir * TURN_ON_SPOT_SPEED;
-//    left_motor_demand =  dir * TURN_ON_SPOT_SPEED;
+    // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
+    // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
 
     //  } else if (state == STATE_FOLLOW_LINE) {
     //
