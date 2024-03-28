@@ -22,6 +22,11 @@ PID_c heading_PID;         // Create instance of the PID_c class for the heading
 #define TURN 3
 #define STATE_FINISHED 4
 #define STATE_FINAL 5
+#define STATE_SQUARE 6
+#define STATE_CALIBRATION 7
+#define ON_CROSS 8
+#define CALIBRATION_LINE 9
+#define DISPLAY_RESULTS 10
 
 int state; // Variable to store the current state
 
@@ -33,6 +38,12 @@ int side_count = 0; // Count of the number of sides of the square
 int num_squares = 1; // Number of squares to complete
 int dir = 1;
 
+// calibration stuff:
+int straight_line_dist = 100; // Length of measured straight line section in mm
+long e0_start = 0;
+long e1_start = 0;
+float new_r0;
+float new_r1;
 
 // DECIDE STATE:
 
@@ -53,7 +64,9 @@ class State_c {
 
     void update() {
 
-      if (state == STATE_INITIAL && (millis() - timer >= 1500)) {
+
+      // Square-related states:
+      if (state == STATE_SQUARE && (millis() - timer >= 1500)) {
         state = STATE_DRIVE_FORWARD;
       }
 
@@ -86,9 +99,38 @@ class State_c {
 
       else if (state == TURN && side_count >= (( 4 * num_squares) - 1)) {
         buzzer.beep(1000, 400);
-        state = STATE_FINAL;
+        //        state = STATE_FINAL;
+        state = DISPLAY_RESULTS;
       }
 
+
+
+      // Calibration-related states
+      else if (state == STATE_CALIBRATION && line[0] && line[4]) {
+
+        state = ON_CROSS;
+
+      }
+      else if (state == ON_CROSS && !line[0] && !line[4]) {
+
+        // TAKE COUNT MEASURE
+        e0_start = count_e0;
+        e1_start = count_e1;
+
+        // change to folow line
+        state = CALIBRATION_LINE;
+
+      }
+      else if (state == CALIBRATION_LINE && line[0] && line[4]) {
+
+        // Update radius geometries
+        new_r0 = kinematics.get_radius(0, straight_line_dist, e0_start);
+        new_r1 = kinematics.get_radius(1, straight_line_dist, e1_start);
+
+        // print result
+        state = DISPLAY_RESULTS;
+
+      }
     }
 
     void state_actions() {
@@ -111,37 +153,30 @@ class State_c {
         // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
         // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
 
-        //  } else if (state == STATE_FOLLOW_LINE) {
-        //
-        //    follow_line();
-        //
-        //  } else if (state == STATE_REJOIN_LINE) {
-        //
-        //    rejoin_line();
-        //
-        //  } else if (state == STATE_INTERSECTION) {
-        //
-        //    intersection();
-        //
-        //  } else if (state == STATE_CROSSROADS) {
-        //
-        //    crossroads();
-        //
-        //  } else if (state == STATE_FACE_HOME) {
-        //
-        //    face_home();
-        //
-        //  } else if (state == STATE_RTH) {
-        //
-        //    return_home();
-        //
-        //  } else if (state == STATE_FINISHED) {
-        //
-        //    // Stop the motors
-        //    motors.set_motor(0, 0, MAX_MOTOR_STEP_SIZE);
-        //    if (millis() - timer <= 1500) {
-        //      buzzer.beep(1000, 10);
-        //    }
+      } else if (state == STATE_CALIBRATION) {
+
+        motors.follow_line();
+
+      } else if (state == ON_CROSS) {
+
+        motors.follow_line();
+
+      } else if (state == CALIBRATION_LINE) {
+
+        motors.follow_line();
+
+      } else if (state == DISPLAY_RESULTS) {
+
+        // STOP
+        right_motor_demand =  0;
+        left_motor_demand = 0;
+
+        Serial.print("new_r0: ");
+        Serial.print(new_r0);
+        Serial.print(" ");
+        Serial.print("new_r1: ");
+        Serial.println(new_r1);
+
 
       } else if (state == STATE_DEBUG) {
 
