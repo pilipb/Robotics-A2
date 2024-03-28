@@ -55,7 +55,7 @@ void setup() {
   state_ts = millis();
 
   // Set system state to intial
-  state = STATE_INITIAL;  // STATE_INITIAL STATE_FOLLOW_LINE STATE_DEBUG
+  state = STATE_CALIBRATION;  // STATE_SQUARE for testing, STATE_CALIBRATION for calibration
   timer = millis();
 }
 
