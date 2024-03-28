@@ -106,6 +106,7 @@ class State_c {
 
 
       // Calibration-related states
+      
       else if (state == STATE_CALIBRATION && line[0] && line[4]) {
 
         state = ON_CROSS;
@@ -153,15 +154,7 @@ class State_c {
         // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
         // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
 
-      } else if (state == STATE_CALIBRATION) {
-
-        motors.follow_line();
-
-      } else if (state == ON_CROSS) {
-
-        motors.follow_line();
-
-      } else if (state == CALIBRATION_LINE) {
+      } else if (state == STATE_CALIBRATION || state == ON_CROSS || state == CALIBRATION_LINE ) {
 
         motors.follow_line();
 
