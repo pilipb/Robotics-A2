@@ -9,11 +9,11 @@ class Buzzer_c {
     Buzzer_c() {}
 
     void initialise() {
-    pinMode(BUZZER_PIN, OUTPUT);
+      pinMode(BUZZER_PIN, OUTPUT);
     }
 
     void beep(int frequency, int duration) {
-    tone(BUZZER_PIN, frequency, duration);
+      tone(BUZZER_PIN, frequency, duration);
     }
 };
 
