@@ -51,6 +51,17 @@ class Kinematics_c {
         theta_i = theta_i + delta_theta;
     }
 
+    // Function to calculate the radii of the left and right wheels
+    float get_radius(int wheel, int dist_travelled) {
+        float r;
+        if (wheel == 0) {
+            r = COUNTS_PER_REV * dist_travelled / (count_e0 - last_e0);
+        } else {
+            r = COUNTS_PER_REV * dist_travelled / (count_e1 - last_e1);
+        }
+        return r;
+    }
+
 };
 
 
