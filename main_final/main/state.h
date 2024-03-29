@@ -23,10 +23,12 @@ PID_c heading_PID;         // Create instance of the PID_c class for the heading
 #define STATE_FINISHED 4
 #define STATE_FINAL 5
 #define STATE_SQUARE 6
-#define STATE_CALIBRATION 7
+#define LINE_CALIBRATION 7
 #define ON_CROSS 8
 #define CALIBRATION_LINE 9
 #define DISPLAY_RESULTS 10
+#define ANGLE_CALIBRATION 11
+#define CALIBRATION_ARC 12
 
 int state; // Variable to store the current state
 
@@ -39,11 +41,14 @@ int num_squares = 1; // Number of squares to complete
 int dir = 1;
 
 // calibration stuff:
-int straight_line_dist = 100; // Length of measured straight line section in mm
+int straight_line_dist = 338; // Length of measured straight line section in mm
 long e0_start = 0;
 long e1_start = 0;
 float new_r0;
 float new_r1;
+
+float calibration_angle = PI; // the angle of the arc
+float new_L;
 
 // DECIDE STATE:
 
@@ -106,8 +111,8 @@ class State_c {
 
 
       // Calibration-related states
-      
-      else if (state == STATE_CALIBRATION && line[0] && line[4]) {
+
+      else if (state == LINE_CALIBRATION && line[0] && line[4]) {
 
         state = ON_CROSS;
 
@@ -132,7 +137,39 @@ class State_c {
         state = DISPLAY_RESULTS;
 
       }
+
+      // Angle calibration
+      else if (state == ANGLE_CALIBRATION && line[0] && line[4]) {
+
+        state = ON_CROSS;
+
+      }
+      else if (state == ON_CROSS && !line[0] && !line[4]) {
+
+        // TAKE COUNT MEASURE
+        e0_start = count_e0;
+        e1_start = count_e1;
+
+        // change to folow line
+        state = CALIBRATION_ARC;
+
+      }
+      else if (state == CALIBRATION_ARC && line[0] && line[4]) {
+
+        // Update width geometry
+        new_L = kinematics.get_L(calibration_angle, e0_start, e1_start);
+
+        // print result
+        state = DISPLAY_RESULTS;
+
+      }
+
     }
+
+
+
+
+
 
     void state_actions() {
       // STATE MACHINE:
@@ -154,7 +191,7 @@ class State_c {
         // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
         // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
 
-      } else if (state == STATE_CALIBRATION || state == ON_CROSS || state == CALIBRATION_LINE ) {
+      } else if (state == LINE_CALIBRATION || state == ON_CROSS || state == CALIBRATION_LINE || state == ANGLE_CALIBRATION || state == CALIBRATION_ARC ) {
 
         motors.follow_line();
 
@@ -168,7 +205,10 @@ class State_c {
         Serial.print(new_r0);
         Serial.print(" ");
         Serial.print("new_r1: ");
-        Serial.println(new_r1);
+        Serial.print(new_r1);
+        Serial.print(" ");
+        Serial.print("new_L: ");
+        Serial.println(new_L);
 
 
       } else if (state == STATE_DEBUG) {
