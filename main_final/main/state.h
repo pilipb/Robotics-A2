@@ -41,11 +41,11 @@ int num_squares = 1; // Number of squares to complete
 int dir = 1;
 
 // calibration stuff:
-int straight_line_dist = 338; // Length of measured straight line section in mm
+int straight_line_dist = 222; // Length of measured straight line section in mm
 long e0_start = 0;
 long e1_start = 0;
-float new_r0;
-float new_r1;
+double new_r0;
+double new_r1;
 
 float calibration_angle = PI; // the angle of the arc
 float new_L;
@@ -122,9 +122,11 @@ class State_c {
         // TAKE COUNT MEASURE
         e0_start = count_e0;
         e1_start = count_e1;
-
+        
         // change to folow line
         state = CALIBRATION_LINE;
+
+        buzzer.beep(1000, 200);
 
       }
       else if (state == CALIBRATION_LINE && line[0] && line[4]) {
@@ -132,6 +134,8 @@ class State_c {
         // Update radius geometries
         new_r0 = kinematics.get_radius(0, straight_line_dist, e0_start);
         new_r1 = kinematics.get_radius(1, straight_line_dist, e1_start);
+
+        buzzer.beep(1000, 200);
 
         // print result
         state = DISPLAY_RESULTS;
