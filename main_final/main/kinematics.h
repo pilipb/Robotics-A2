@@ -7,6 +7,9 @@ int const COUNTS_PER_REV = 359; // Number of encoder updates per revolution
 float const WHEEL_RADIUS = 32.5 / 2; // Wheel radius in mm
 float distance_per_count = (2 * PI*WHEEL_RADIUS) / COUNTS_PER_REV; // Distance per encoder count in mm
 
+float radius_r = 16;
+float radius_l = 16;
+
 float x_i; // Global x position of the robot
 float y_i; // Global y position of the robot
 float theta_i; // Angle of the robot WRS to the x-axis
@@ -63,14 +66,28 @@ class Kinematics_c {
     float get_radius(int wheel, int dist_travelled, long start_count) {
       // this calculation is derived from travel along a straightline (and is only valid when travelling
       // in a straight line)
-      
+
       float r;
       if (wheel == 0) {
         r = COUNTS_PER_REV * dist_travelled / (count_e0 - start_count);
       } else {
         r = COUNTS_PER_REV * dist_travelled / (count_e1 - start_count);
       }
-      return r;
+      return abs(r);
+    }
+
+    // Function to calculate the width L
+    float get_L(float angle, long start_count_r, long start_count_l) {
+      // this function assumes that the radius of both wheels is known and correct
+      float L;
+
+      float delta_r = (count_e0 - start_count_r) * radius_r;
+      float delta_l = (count_e1 - start_count_l) * radius_l;
+
+      L = (PI * (delta_r - delta_l)) / (angle * COUNTS_PER_REV);
+
+      return L;
+
     }
 
 };
