@@ -26,8 +26,6 @@ unsigned long ramp_ts;
 unsigned long state_ts;
 
 
-
-
 void setup() {
 
   kinematics.initialise(); // Initialise the kinematic model
@@ -55,7 +53,7 @@ void setup() {
   state_ts = millis();
 
   // Set system state to intial
-  state = STATE_CALIBRATION;  // STATE_SQUARE for testing, STATE_CALIBRATION for calibration
+  state = LINE_CALIBRATION;  // STATE_SQUARE for testing, LINE_CALIBRATION for line calibration, ANGLE_CALIBRATION for angle calibration
   timer = millis();
 }
 
