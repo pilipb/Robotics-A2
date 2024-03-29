@@ -181,11 +181,11 @@ class Motors_c
       // Calculate the heading error
       heading_error = line_sensors.normalise_sensor_readings(sensor_readings);
 
-      if (line[0] && !line[4]) {
-        heading_error = 0.8;
+      if (line[1] && !line[3]) {
+        heading_error = 0.4;
       }
-      else if (!line[0] && line[4]) {
-        heading_error = -0.8;
+      else if (!line[1] && line[3]) {
+        heading_error = -0.4;
       }
 
       // Set the motor demand accordingly
