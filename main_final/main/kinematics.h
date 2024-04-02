@@ -69,9 +69,9 @@ class Kinematics_c {
 
       float r;
       if (wheel == 0) {
-        r = COUNTS_PER_REV * dist_travelled / (count_e0 - start_count);
+        r = COUNTS_PER_REV * dist_travelled / (2*PI*(count_e0 - start_count));
       } else {
-        r = COUNTS_PER_REV * dist_travelled / (count_e1 - start_count);
+        r = COUNTS_PER_REV * dist_travelled / (2*PI*(count_e1 - start_count));
       }
       return abs(r);
     }
