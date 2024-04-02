@@ -63,11 +63,11 @@ class Kinematics_c {
     }
 
     // Function to calculate the radii of the left and right wheels
-    double get_radius(int wheel, int dist_travelled, long start_count) {
+    float get_radius(int wheel, float dist_travelled, long start_count) {
       // this calculation is derived from travel along a straightline (and is only valid when travelling
       // in a straight line)
 
-      double r;
+      float r;
       if (wheel == 0) {
         r = COUNTS_PER_REV * dist_travelled / (count_e0 - start_count);
       } else {
