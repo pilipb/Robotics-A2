@@ -42,7 +42,7 @@ int num_squares = 1; // Number of squares to complete
 int dir = 1;
 
 // calibration stuff:
-float straight_line_dist = 228; // Length of measured straight line section in mm
+float straight_line_dist = 248; // Length of measured straight line section in mm
 long e0_start = 0;
 long e1_start = 0;
 float new_r0;
