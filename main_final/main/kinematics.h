@@ -4,11 +4,10 @@
 #include "encoders.h"
 
 int const COUNTS_PER_REV = 359; // Number of encoder updates per revolution
-float const WHEEL_RADIUS = 32.5 / 2; // Wheel radius in mm
-float distance_per_count = (2 * PI*WHEEL_RADIUS) / COUNTS_PER_REV; // Distance per encoder count in mm
-
-float radius_r = 16;
-float radius_l = 16;
+float const WHEEL_RADIUS_R = 32.5 / 2; // Wheel radius in mm right
+float const WHEEL_RADIUS_L = 32.5 / 2; // Wheel radius in mm left
+float distance_per_count_r = (2 * PI*WHEEL_RADIUS_R) / COUNTS_PER_REV; // Distance per encoder count in mm
+float distance_per_count_l = (2 * PI*WHEEL_RADIUS_L) / COUNTS_PER_REV; // Distance per encoder count in mm
 
 float x_i; // Global x position of the robot
 float y_i; // Global y position of the robot
@@ -48,8 +47,8 @@ class Kinematics_c {
       last_e1 = count_e1;
 
       // calculate the distance travelled since the last update
-      float distance_r = delta_e0 * distance_per_count;
-      float distance_l = delta_e1 * distance_per_count;
+      float distance_r = delta_e0 * distance_per_count_r;
+      float distance_l = delta_e1 * distance_per_count_l;
       float delta_xr = (distance_l + distance_r) / 2;
 
       // update the global x and y position of the robot
@@ -77,14 +76,14 @@ class Kinematics_c {
     }
 
     // Function to calculate the width L
-    float get_L(float angle, long start_count_r, long start_count_l) {
+    float get_L(float angle, long start_count_r, long start_count_l, float new_r0, float new_r1) {
       // this function assumes that the radius of both wheels is known and correct
       float L;
 
-      float delta_r = (count_e0 - start_count_r) * radius_r;
-      float delta_l = (count_e1 - start_count_l) * radius_l;
+      float delta_r = (count_e0 - start_count_r) * new_r0;
+      float delta_l = (count_e1 - start_count_l) * new_r1;
 
-      L = (PI * (delta_r - delta_l)) / (angle * COUNTS_PER_REV);
+      L = abs((PI * (delta_r - delta_l)) / (angle * COUNTS_PER_REV));
 
       return L;
 

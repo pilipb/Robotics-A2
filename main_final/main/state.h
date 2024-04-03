@@ -111,7 +111,7 @@ class State_c {
 
 
 
-      // Calibration-related states
+      // line calibration-related states
 
       else if (state == LINE_CALIBRATION && line[0] && line[4]) {
 
@@ -123,7 +123,7 @@ class State_c {
         // TAKE COUNT MEASURE
         e0_start = count_e0;
         e1_start = count_e1;
-        
+
         // change to folow line
         state = CALIBRATION_LINE;
 
@@ -139,9 +139,12 @@ class State_c {
         buzzer.beep(1000, 200);
 
         // print result
-        state = DISPLAY_RESULTS;
+        // state = DISPLAY_RESULTS;
+        // continue calibration
+        state = ON_CROSS_2;
 
       }
+
 
       // Angle calibration
       else if (state == ANGLE_CALIBRATION && line[0] && line[4]) {
@@ -164,7 +167,7 @@ class State_c {
       else if (state == CALIBRATION_ARC && line[0] && line[4]) {
 
         // Update width geometry
-        new_L = kinematics.get_L(calibration_angle, e0_start, e1_start);
+        new_L = kinematics.get_L(calibration_angle, e0_start, e1_start, new_r0, new_r1);
 
         buzzer.beep(1000, 200);
 

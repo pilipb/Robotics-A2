@@ -1,6 +1,7 @@
 #ifndef _PID_H
 #define _PID_H
 
+
 float rotation_speed_r_smoothed;
 float rotation_speed_l_smoothed;
 
@@ -61,8 +62,8 @@ class PID_c {
       last_e1 = count_e1;
 
       // Calculate rotation speed in mm/s
-      float rotation_speed_r = ((float)delta_e0 / (float)delta_ts) * 1000.0 * distance_per_count;
-      float rotation_speed_l = ((float)delta_e1 / (float)delta_ts) * 1000.0 * distance_per_count;
+      float rotation_speed_r = ((float)delta_e0 / (float)delta_ts) * 1000.0 * distance_per_count_r;
+      float rotation_speed_l = ((float)delta_e1 / (float)delta_ts) * 1000.0 * distance_per_count_l;
       // Pass the readings through a low pass filter to smooth the readings
       rotation_speed_r_smoothed = LPF(rotation_speed_r, 0.17);
       rotation_speed_l_smoothed = LPF(rotation_speed_l, 0.17);
