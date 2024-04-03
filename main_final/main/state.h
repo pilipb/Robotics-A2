@@ -30,6 +30,7 @@ PID_c heading_PID;         // Create instance of the PID_c class for the heading
 #define ANGLE_CALIBRATION 11
 #define CALIBRATION_ARC 12
 #define ON_CROSS_2 13
+#define STATE_LINE 14
 
 int state; // Variable to store the current state
 
@@ -40,6 +41,9 @@ float SQUARE_SIZE = 200; // Size of the square in mm
 int side_count = 0; // Count of the number of sides of the square
 int num_squares = 1; // Number of squares to complete
 int dir = 1;
+
+// straight line stuff
+float DISTANCE = 200; // distance of straight line test
 
 // calibration stuff:
 float straight_line_dist = 248; // Length of measured straight line section in mm
@@ -107,6 +111,21 @@ class State_c {
         buzzer.beep(1000, 400);
         //        state = STATE_FINAL;
         state = DISPLAY_RESULTS;
+      }
+
+
+      // straightline test
+      else if (state == STATE_LINE && (millis() - timer >= 1500) && (x_i <= DISTANCE)) {
+
+        // drive forward in a straight line 
+        motors.drive_along_angle(0);
+        
+      }
+      else if (state == STATE_LINE && (millis() - timer >= 1500) && (x_i > DISTANCE)) {
+
+        // stop
+        state = STATE_FINAL;
+        
       }
 
 
