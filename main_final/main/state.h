@@ -31,6 +31,10 @@ PID_c heading_PID;         // Create instance of the PID_c class for the heading
 #define CALIBRATION_ARC 12
 #define ON_CROSS_2 13
 #define STATE_LINE 14
+#define ON_CROSS_3 15
+#define ON_CROSS_4 16
+#define DISPLAY_LINEAR 17
+#define DRIVE 18
 
 int state; // Variable to store the current state
 
@@ -43,10 +47,12 @@ int num_squares = 2; // Number of squares to complete
 int dir = 1;
 
 // straight line stuff
-float DISTANCE = 1000; // distance of straight line test
+int tick_count = 0; // keep track of which tick is crossed
+float distance_1; // distance measurement 1
+float distance_2; // distance measurement 2
 
 // calibration stuff:
-float straight_line_dist = 482; // Length of measured straight line section in mm
+float straight_line_dist = 500; // Length of measured straight line section in mm
 long e0_start = 0;
 long e1_start = 0;
 float new_r0;
@@ -75,7 +81,8 @@ class State_c {
     void update() {
 
 
-      // Square-related states:
+      // SQUARE state decisions:
+      //---------------------
       if (state == STATE_SQUARE && (millis() - timer >= 1500)) {
         state = STATE_DRIVE_FORWARD;
       }
@@ -114,24 +121,43 @@ class State_c {
       }
 
 
-      // straightline test
-      else if (state == STATE_LINE && (millis() - timer >= 1500) && (x_i <= DISTANCE)) {
-
+      // STRAIGHT_LINE state decisions:
+      //-------------------------------
+      else if (state == STATE_LINE && (millis() - timer >= 1500)) {
         // drive forward in a straight line 
-        motors.drive_along_angle(0);
-        
-      }
-      else if (state == STATE_LINE && (millis() - timer >= 1500) && (x_i > DISTANCE)) {
+        state = DRIVE;
 
-        // stop
-        state = STATE_FINAL;
-        
       }
 
+      else if (state == DRIVE && tick_count == 0 && line[0] && line[4]) {
+
+        tick_count ++;
+        distance_1 = x_i; // Record the x position of the rising edge of the first tick
+        state = ON_CROSS_3;
+
+      }
+
+      else if (state == ON_CROSS_3 && !line[0] && !line[4]) {
+        state = DRIVE;
+
+      }
+
+      else if (state == DRIVE && tick_count == 1 && line[0] && line[4]) {
+
+        tick_count ++;
+        distance_2 = x_i; // Record the x position of the rising edge of the second tick
+        state = ON_CROSS_4;
+
+      }
+
+      else if (state == ON_CROSS_4 && !line[0] && !line[4]) {
+        state = DISPLAY_LINEAR;
+
+      }
 
 
-      // line calibration-related states
-
+      // CALIBRATION state decisions:
+      //-----------------------------
       else if (state == LINE_CALIBRATION && line[0] && line[4]) {
 
         state = ON_CROSS_1;
@@ -194,12 +220,8 @@ class State_c {
         state = DISPLAY_RESULTS;
 
       }
-
+    
     }
-
-
-
-
 
 
     void state_actions() {
@@ -222,7 +244,7 @@ class State_c {
         // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
         // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
 
-      } else if (state == LINE_CALIBRATION || state == ON_CROSS_1 || state == ON_CROSS_2 || state == CALIBRATION_LINE || state == ANGLE_CALIBRATION || state == CALIBRATION_ARC ) {
+      } else if (state == LINE_CALIBRATION || state == ON_CROSS_1 || state == ON_CROSS_2 || state == ON_CROSS_3 ||state == ON_CROSS_4 || state == CALIBRATION_LINE || state == ANGLE_CALIBRATION || state == CALIBRATION_ARC ) {
 
         motors.follow_line();
 
@@ -241,14 +263,36 @@ class State_c {
         Serial.print("new_L: ");
         Serial.println(new_L);
 
+      } else if (state == DISPLAY_LINEAR) {
+
+        // STOP
+        right_motor_demand =  0;
+        left_motor_demand = 0;
+
+        // calculate distance
+        float distance = distance_2 - distance_1;
+
+        Serial.print("DISTANCE: ");
+        Serial.println(distance);
+
+      } else if (state == DRIVE) {
+        motors.drive_along_angle(0);
 
       } else if (state == STATE_DEBUG) {
 
-        right_motor_demand =  TURN_ON_SPOT_SPEED;
-        left_motor_demand = -TURN_ON_SPOT_SPEED;
+        // right_motor_demand =  TURN_ON_SPOT_SPEED;
+        // left_motor_demand = -TURN_ON_SPOT_SPEED;
+        Serial.print(line[0]);
+        Serial.print(line[1]);
+        Serial.print(line[2]);
+        Serial.print(line[3]);
+        Serial.println(line[4]);
+
+
 
       }
     }
 };
 
 #endif
+

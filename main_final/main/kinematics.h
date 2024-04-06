@@ -4,8 +4,8 @@
 #include "encoders.h"
 
 int const COUNTS_PER_REV = 358.3; // Number of encoder updates per revolution
-float const WHEEL_RADIUS_R = 16.24; // Wheel radius in mm right
-float const WHEEL_RADIUS_L = 16.22; // Wheel radius in mm left
+float const WHEEL_RADIUS_R = 16; //16.24; // Wheel radius in mm right
+float const WHEEL_RADIUS_L = 16; //16.22; // Wheel radius in mm left
 float distance_per_count_r = (2 * PI*WHEEL_RADIUS_R) / COUNTS_PER_REV; // Distance per encoder count in mm
 float distance_per_count_l = (2 * PI*WHEEL_RADIUS_L) / COUNTS_PER_REV; // Distance per encoder count in mm
 
@@ -17,7 +17,7 @@ float theta_i; // Angle of the robot WRS to the x-axis
 class Kinematics_c {
 
   private:
-    float const L = 42.57; //86.2 / 2; // Distance from wheel to center of robot in mm
+    float const L = 86.2 / 2; // Distance from wheel to center of robot in mm
     int last_e0 = 0; // Encoder value of the Right encoder at the last kinematic update
     int last_e1 = 0; // Encoder value of the Left encoder at the last kinematic update
 
