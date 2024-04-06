@@ -37,16 +37,16 @@ int state; // Variable to store the current state
 unsigned long timer;
 
 // square stuff:
-float SQUARE_SIZE = 200; // Size of the square in mm
+float SQUARE_SIZE = 500; // Size of the square in mm
 int side_count = 0; // Count of the number of sides of the square
-int num_squares = 1; // Number of squares to complete
+int num_squares = 2; // Number of squares to complete
 int dir = 1;
 
 // straight line stuff
-float DISTANCE = 200; // distance of straight line test
+float DISTANCE = 1000; // distance of straight line test
 
 // calibration stuff:
-float straight_line_dist = 248; // Length of measured straight line section in mm
+float straight_line_dist = 482; // Length of measured straight line section in mm
 long e0_start = 0;
 long e1_start = 0;
 float new_r0;
@@ -80,35 +80,35 @@ class State_c {
         state = STATE_DRIVE_FORWARD;
       }
 
-      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 0 && (x_i >= SQUARE_SIZE)) {
-        buzzer.beep(1000, 200);
+      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 0 && ((x_i) >= SQUARE_SIZE)) {
+//        buzzer.beep(1000, 200);
         state = TURN;
       }
 
-      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 1 && (y_i >= SQUARE_SIZE)) {
-        buzzer.beep(1000, 200);
+      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 1 && ((y_i) >= SQUARE_SIZE)) {
+//        buzzer.beep(1000, 200);
         state = TURN;
       }
 
-      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 2 && (x_i <= 0)) {
-        buzzer.beep(1000, 200);
+      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 2 && ((x_i) <= 0)) {
+//        buzzer.beep(1000, 200);
         state = TURN;
       }
 
-      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 3 && (y_i <= 0)) {
-        buzzer.beep(1000, 200);
+      else if (state == STATE_DRIVE_FORWARD && side_count % 4 == 3 && ((y_i) <= 0)) {
+//        buzzer.beep(1000, 200);
         state = TURN;
       }
 
       else if (state == TURN && theta_i >= (((side_count + 1)*PI) / 2)) {
-        buzzer.beep(1000, 200);
+//        buzzer.beep(1000, 200);
         state = STATE_DRIVE_FORWARD;
         integral_reset();
         side_count++;
       }
 
       else if (state == TURN && side_count >= (( 4 * num_squares) - 1)) {
-        buzzer.beep(1000, 400);
+//        buzzer.beep(1000, 400);
         //        state = STATE_FINAL;
         state = DISPLAY_RESULTS;
       }
@@ -212,12 +212,12 @@ class State_c {
 
       } else if (state == STATE_DRIVE_FORWARD) {
 
-        float angle = side_count * PI / 2;
+        float angle = dir * side_count * PI / 2;
         motors.drive_along_angle(angle);
 
       } else if (state == TURN) {
 
-        motors.rotate_on_spot(((side_count + 1)*PI) / 2);
+        motors.rotate_on_spot((dir * (side_count + 1)*PI) / 2);
 
         // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
         // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
