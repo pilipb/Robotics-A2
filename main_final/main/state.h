@@ -52,7 +52,7 @@ float distance_1; // distance measurement 1
 float distance_2; // distance measurement 2
 
 // calibration stuff:
-float straight_line_dist = 500; // Length of measured straight line section in mm
+float straight_line_dist = 482; // Length of measured straight line section in mm
 long e0_start = 0;
 long e1_start = 0;
 float new_r0;
