@@ -295,4 +295,3 @@ class State_c {
 };
 
 #endif
-
