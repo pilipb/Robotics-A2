@@ -52,7 +52,7 @@ float distance_1; // distance measurement 1
 float distance_2; // distance measurement 2
 
 // calibration stuff:
-float straight_line_dist = 482; // Length of measured straight line section in mm
+float straight_line_dist = 500; // Length of measured straight line section in mm
 long e0_start = 0;
 long e1_start = 0;
 float new_r0;
@@ -158,16 +158,17 @@ class State_c {
 
       // CALIBRATION state decisions:
       //-----------------------------
-      else if (state == LINE_CALIBRATION && line[0] && line[4]) {
+      else if (state == LINE_CALIBRATION && tick_count == 0 && line[0] && line[4]) {
+
+        tick_count ++;
+        // TAKE COUNT MEASURE
+        e0_start = count_e0;
+        e1_start = count_e1;
 
         state = ON_CROSS_1;
 
       }
       else if (state == ON_CROSS_1 && !line[0] && !line[4]) {
-
-        // TAKE COUNT MEASURE
-        e0_start = count_e0;
-        e1_start = count_e1;
 
         // change to folow line
         state = CALIBRATION_LINE;
@@ -175,7 +176,9 @@ class State_c {
         buzzer.beep(1000, 200);
 
       }
-      else if (state == CALIBRATION_LINE && line[0] && line[4]) {
+      else if (state == CALIBRATION_LINE && tick_count == 1 && line[0] && line[4]) {
+
+        tick_count ++;
 
         // Update radius geometries
         new_r0 = kinematics.get_radius(0, straight_line_dist, e0_start);
@@ -213,8 +216,6 @@ class State_c {
 
         // Update width geometry
         new_L = kinematics.get_L(calibration_angle, e0_start, e1_start, new_r0, new_r1);
-
-        buzzer.beep(1000, 200);
 
         // print result
         state = DISPLAY_RESULTS;
