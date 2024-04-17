@@ -53,7 +53,7 @@ void setup() {
   state_ts = millis();
 
   // Set system state to intial
-  state = LINE_CALIBRATION;  // STATE_SQUARE, STATE_LINE for testing, LINE_CALIBRATION for calibration
+  state = STATE_ANTI_SQUARE;  // STATE_SQUARE, STATE_ANTI_SQUARE, STATE_LINE for testing, LINE_CALIBRATION for calibration
   timer = millis();
 }
 

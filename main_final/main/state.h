@@ -35,6 +35,10 @@ PID_c heading_PID;         // Create instance of the PID_c class for the heading
 #define ON_CROSS_4 16
 #define DISPLAY_LINEAR 17
 #define DRIVE 18
+#define STATE_ANTI_SQUARE 19
+#define STATE_ANTI_DRIVE_FORWARD 20
+#define ANTI_TURN 21
+
 
 int state; // Variable to store the current state
 
@@ -119,6 +123,48 @@ class State_c {
         //        state = STATE_FINAL;
         state = DISPLAY_RESULTS;
       }
+
+      
+
+      // ANTI SQUARE state decisions:
+      //---------------------
+      if (state == STATE_ANTI_SQUARE && (millis() - timer >= 1500)) {
+        state = STATE_ANTI_DRIVE_FORWARD;
+      }
+
+      else if (state == STATE_ANTI_DRIVE_FORWARD && side_count % 4 == 0 && ((x_i) >= SQUARE_SIZE)) {
+//        buzzer.beep(1000, 200);
+        state = ANTI_TURN;
+      }
+
+      else if (state == STATE_ANTI_DRIVE_FORWARD && side_count % 4 == 1 && (abs(y_i) >= SQUARE_SIZE)) {
+//        buzzer.beep(1000, 200);
+        state = ANTI_TURN;
+      }
+
+      else if (state == STATE_ANTI_DRIVE_FORWARD && side_count % 4 == 2 && ((x_i) <= 0)) {
+//        buzzer.beep(1000, 200);
+        state = ANTI_TURN;
+      }
+
+      else if (state == STATE_ANTI_DRIVE_FORWARD && side_count % 4 == 3 && ((y_i) >= 0)) {
+//        buzzer.beep(1000, 200);
+        state = ANTI_TURN;
+      }
+
+      else if (state == ANTI_TURN && theta_i <= -(((side_count + 1)*PI) / 2)) {
+//        buzzer.beep(1000, 200);
+        state = STATE_ANTI_DRIVE_FORWARD;
+        integral_reset();
+        side_count++;
+      }
+
+      else if (state == ANTI_TURN && side_count >= (( 4 * num_squares) - 1)) {
+//        buzzer.beep(1000, 400);
+        //        state = STATE_FINAL;
+        state = DISPLAY_RESULTS;
+      }
+
 
 
       // STRAIGHT_LINE state decisions:
@@ -238,9 +284,21 @@ class State_c {
         float angle = dir * side_count * PI / 2;
         motors.drive_along_angle(angle);
 
+      } else if (state == STATE_ANTI_DRIVE_FORWARD) {
+
+        float angle = -side_count * PI / 2;
+        motors.drive_along_angle(angle);
+
       } else if (state == TURN) {
 
         motors.rotate_on_spot((dir * (side_count + 1)*PI) / 2);
+
+        // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
+        // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
+
+      } else if (state == ANTI_TURN) {
+
+        motors.rotate_on_spot((-1 * (side_count + 1)*PI) / 2);
 
         // right_motor_demand =  dir * TURN_ON_SPOT_SPEED;
         // left_motor_demand =  - dir * TURN_ON_SPOT_SPEED;
@@ -280,6 +338,9 @@ class State_c {
         motors.drive_along_angle(0);
 
       } else if (state == STATE_DEBUG) {
+
+        float angle = -side_count * PI / 2;
+        motors.drive_along_angle(angle);
 
         // right_motor_demand =  TURN_ON_SPOT_SPEED;
         // left_motor_demand = -TURN_ON_SPOT_SPEED;
