@@ -1,3 +1,3 @@
 # Robotics-A2
  
-[embed]blob/main/Robotic_Systems_Report.pdf [/embed]
+[embed]main/Robotic_Systems_Report.pdf [/embed]
